@@ -12,6 +12,7 @@ async function connectToDatabase(uri) {
     await client.connect();
     const db = client.db("voteApp");
     collections.users = db.collection("users");
+    collections.viewResult = db.collection("viewResult");
 }
 connectToDatabase(mongoDBURL).then(() => {
     app.use(express.json());
@@ -27,6 +28,8 @@ connectToDatabase(mongoDBURL).then(() => {
     app.post('/login', async (req, res) => {
         try{
             const loginUserDetail = await collections?.users?.find({ employeeId: req.body.employeeId }).toArray();
+            const viewResultArr = await collections?.viewResult?.find({}).toArray();
+            let viewResultVal = viewResultArr[0].viewResult;
             if(loginUserDetail.length==0){
                 res.status(404).send({'error':'UNF','message':'User Not Found'});
             }
@@ -37,7 +40,7 @@ connectToDatabase(mongoDBURL).then(() => {
                     fetchVoteCandidates.forEach(f => {
                         updatedVotersArr.push({"employeeId": f.employeeId, "name": f.name, "gender": f.gender, "hasVoted": f.hasVoted});
                     });
-                    res.status(200).send({loginUserDetail, updatedVotersArr});
+                    res.status(200).send({loginUserDetail, updatedVotersArr, viewResultVal});
                 }
                 else{
                     res.status(401).send({'error':'LPM','message':'Login Password Mismatch'});
