@@ -17,7 +17,7 @@ async function connectToDatabase(uri) {
 connectToDatabase(mongoDBURL).then(() => {
     app.use(express.json());
     app.use(cors());
-    app.get('/getusers', async (_req, res) => {
+    app.get('/api/getusers', async (_req, res) => {
         try {
             const users = await collections?.users?.find({}).toArray();
             res.status(200).send(users);
@@ -25,7 +25,7 @@ connectToDatabase(mongoDBURL).then(() => {
             res.status(500).send(error instanceof Error ? error.message : "Unknown error");
         }
     });
-    app.post('/login', async (req, res) => {
+    app.post('/api/login', async (req, res) => {
         try{
             const loginUserDetail = await collections?.users?.find({ employeeId: req.body.employeeId }).toArray();
             const viewResultArr = await collections?.viewResult?.find({}).toArray();
@@ -50,7 +50,7 @@ connectToDatabase(mongoDBURL).then(() => {
             res.status(500).send(error instanceof Error ? error.message : "Unknown error");
         }
     });
-    app.post('/register', async (req, res) => {
+    app.post('/api/register', async (req, res) => {
         try{
             const checkRegUser = await collections?.users?.find({ employeeId: req.body.employeeId }).toArray();
             if(checkRegUser.length > 0){
@@ -77,7 +77,7 @@ connectToDatabase(mongoDBURL).then(() => {
             res.status(500).send(error instanceof Error ? error.message : "Unknown error");
         }
     });
-    app.post('/userVote', async (req, res) => {
+    app.post('/api/userVote', async (req, res) => {
         try{
             const checkExistUser = await collections?.users?.find({ employeeId: req.body.employeeId }).toArray();
             if(checkExistUser.length == 0){
@@ -128,7 +128,7 @@ connectToDatabase(mongoDBURL).then(() => {
             res.status(500).send(error instanceof Error ? error.message : "Unknown error");
         }
     });
-    app.get('/results', async (req, res) => {
+    app.get('/api/results', async (req, res) => {
         try{
             let registeredUserList = await collections?.users?.find({}).toArray();
             let registeredMaleList = registeredUserList.filter((usr) => usr.gender=='Male');
