@@ -67,8 +67,12 @@ connectToDatabase(mongoDBURL).then(() => {
                 };
                 const regResult = await collections?.users?.insertOne(regReqObj);
                 const usersListAfterReg = await collections?.users?.find({}).toArray();
+                let updatedVotersArrReg = [];
+                usersListAfterReg.forEach(ur => {
+                    updatedVotersArrReg.push({"employeeId": ur.employeeId, "name": ur.name, "gender": ur.gender, "hasVoted": ur.hasVoted});
+                });
                 if (regResult?.acknowledged) {
-                    res.status(201).send({"response":usersListAfterReg,"message": `Created a new user: ID ${regResult.insertedId}.`});
+                    res.status(201).send({"response":updatedVotersArrReg,"message": `Created a new user: ID ${regResult.insertedId}.`});
                 } else {
                     res.status(500).send({"error":"REGERR","message":"Failed to create a new employee."});
                 }
