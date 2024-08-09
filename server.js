@@ -27,14 +27,20 @@ connectToDatabase(mongoDBURL).then(() => {
     });
     app.post('/api/login', async (req, res) => {
         try{
-            const loginUserDetail = await collections?.users?.find({ employeeId: req.body.employeeId }).toArray();
+            const loginUserDetailEnt = await collections?.users?.find({ employeeId: req.body.employeeId }).toArray();
             const viewResultArr = await collections?.viewResult?.find({}).toArray();
             let viewResultVal = viewResultArr[0].viewResult;
-            if(loginUserDetail.length==0){
+            if(loginUserDetailEnt.length==0){
                 res.status(404).send({'error':'UNF','message':'User Not Found'});
             }
             else{
-                if(loginUserDetail[0].password==req.body.password){
+                if(loginUserDetailEnt[0].password==req.body.password){
+                    let loginUserDetail = [{
+                        "employeeId": loginUserDetailEnt[0].employeeId,
+                        "name": loginUserDetailEnt[0].name,
+                        "gender": loginUserDetailEnt[0].gender,
+                        "hasVoted": loginUserDetailEnt[0].hasVoted
+                    }];
                     let fetchVoteCandidates = await collections?.users?.find({}).toArray();
                     let updatedVotersArr = [];
                     fetchVoteCandidates.forEach(f => {
@@ -105,7 +111,11 @@ connectToDatabase(mongoDBURL).then(() => {
                         }
                     });
                     const voteResult = await collections?.users?.updateOne({ "employeeId": req.body.employeeId }, { $set: {"hasVoted": true} });
-                    const usersListAfterVote = await collections?.users?.find({}).toArray();
+                    const usersListAfterVoteEnt = await collections?.users?.find({}).toArray();
+                    let usersListAfterVote = [];
+                    usersListAfterVoteEnt.forEach(uv => {
+                        usersListAfterVote.push({"employeeId": uv.employeeId, "name": uv.name, "gender": uv.gender, "hasVoted": uv.hasVoted});
+                    });
                     if (voteResult?.acknowledged) {
                         res.status(201).send({"response":usersListAfterVote,"message": "User Updated"});
                     } else {
